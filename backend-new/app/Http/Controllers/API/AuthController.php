@@ -20,6 +20,7 @@ class AuthController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'role' => 'nullable|in:user,admin',
         ]);
 
         $user = User::create([
@@ -27,7 +28,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => $request->password,
             'phone' => $request->phone,
-            'role' => 'user',
+            'role' => $request->role ?? 'user',
             'status' => 'active',
         ]);
 
@@ -73,6 +74,37 @@ class AuthController extends Controller
             'message' => 'All users retrieved successfully',
             'data' => $users,
         ]);
+    }
+
+    public function storeUser(Request $request)
+    {
+        // Only allow admins to create new admins
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:user,admin',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'phone' => $request->phone,
+            'role' => $request->role,
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User created securely',
+            'data' => $user,
+        ], 201);
     }
 
     public function login(Request $request)

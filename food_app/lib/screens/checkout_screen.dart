@@ -440,18 +440,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     return;
                   }
 
-                  if (_defaultAddress == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please add a delivery address first'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  
+                  // Optional address: allow proceeding without address
                   final paymentMethod = _cashOnDelivery ? 'cash_on_delivery' : _selectedPayment;
-                  final address = _defaultAddress!.fullAddress;
+                  final address = _defaultAddress != null && _defaultAddress!.fullAddress.isNotEmpty
+                      ? _defaultAddress!.fullAddress
+                      : 'No address provided';
                   
                   final result = await appState.placeOrder(
                     deliveryAddress: address, 

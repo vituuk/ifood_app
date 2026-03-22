@@ -13,7 +13,10 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = $request->user()->orders()->with('items.food');
+        $user = $request->user();
+        $query = $user->role === 'admin' 
+            ? Order::with('items.food') 
+            : $user->orders()->with('items.food');
 
         // Filter by status
         if ($request->has('status')) {
@@ -40,9 +43,10 @@ class OrderController extends Controller
 
     public function show(Request $request, $id)
     {
-        $order = $request->user()->orders()
-            ->with(['items.food', 'payment'])
-            ->findOrFail($id);
+        $user = $request->user();
+        $query = $user->role === 'admin' ? Order::query() : $user->orders();
+        
+        $order = $query->with(['items.food', 'payment'])->findOrFail($id);
 
         return response()->json([
             'success' => true,
@@ -129,7 +133,8 @@ class OrderController extends Controller
 
     public function track(Request $request, $id)
     {
-        $order = $request->user()->orders()->findOrFail($id);
+        $user = $request->user();
+        $order = $user->role === 'admin' ? Order::findOrFail($id) : $user->orders()->findOrFail($id);
 
         return response()->json([
             'success' => true,
@@ -145,7 +150,8 @@ class OrderController extends Controller
 
     public function cancel(Request $request, $id)
     {
-        $order = $request->user()->orders()->findOrFail($id);
+        $user = $request->user();
+        $order = $user->role === 'admin' ? Order::findOrFail($id) : $user->orders()->findOrFail($id);
 
         if (!in_array($order->status, ['pending', 'confirmed'])) {
             return response()->json([
@@ -159,6 +165,70 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Order cancelled successfully',
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        // Only admin can update arbitrary order details
+        if ($user->role !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $order = Order::findOrFail($id);
+
+        $request->validate([
+            'status' => 'sometimes|in:pending,confirmed,preparing,delivering,delivered,cancelled',
+            'payment_status' => 'sometimes|in:pending,paid,failed,refunded',
+        ]);
+
+        if ($request->has('status')) {
+            $order->status = $request->status;
+        }
+
+        if ($request->has('payment_status')) {
+            $order->payment_status = $request->payment_status;
+            
+            // Sync with payment model if exists
+            if ($order->payment) {
+                $statusMap = [
+                    'pending' => 'pending',
+                    'paid' => 'completed',
+                    'failed' => 'failed',
+                    'refunded' => 'refunded'
+                ];
+                $order->payment->update(['status' => $statusMap[$request->payment_status] ?? 'pending']);
+            }
+        }
+
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order updated successfully',
+            'data' => $order->load(['items.food', 'payment']),
+        ]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        // Allow admin to delete any order, allow user to delete their own order
+        $order = $user->role === 'admin' ? Order::findOrFail($id) : $user->orders()->findOrFail($id);
+
+        // Delete related items and payments
+        if ($order->payment) {
+            $order->payment()->delete();
+        }
+        $order->items()->delete();
+        $order->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order deleted successfully',
         ]);
     }
 }

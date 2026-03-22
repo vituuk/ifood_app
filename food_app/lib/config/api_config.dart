@@ -78,4 +78,13 @@ class ApiConfig {
     }
     return url;
   }
+
+  static String getImageUrl(String path) {
+    if (path.isEmpty) return '';
+    if (path.startsWith('http')) return resolveImageUrl(path);
+    if (path.startsWith('/storage/')) {
+       return resolveImageUrl('${baseUrl.replaceAll('/api', '')}$path');
+    }
+    return resolveImageUrl('$storageUrl/$path');
+  }
 }

@@ -67,4 +67,13 @@ class OrderService {
       return false;
     }
   }
+
+  Future<bool> deleteOrder(String orderId) async {
+    try {
+      final response = await _apiClient.delete('/orders/$orderId');
+      return response.data['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
 }

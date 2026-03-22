@@ -140,4 +140,15 @@ class FoodController extends Controller
             'data' => $similarFoods,
         ]);
     }
+
+    public function destroy($id)
+    {
+        $food = Food::findOrFail($id);
+        $food->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Food deleted successfully',
+        ]);
+    }
 }

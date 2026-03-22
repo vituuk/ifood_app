@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
+import '../config/api_config.dart';
 import 'order_history_screen.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -64,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         radius: 50,
                         backgroundColor: Colors.grey[200],
                         backgroundImage: user?.avatar != null 
-                            ? NetworkImage(user!.avatar!) as ImageProvider
+                            ? NetworkImage(ApiConfig.getImageUrl(user!.avatar!)) as ImageProvider
                             : null,
                         child: user?.avatar == null
                             ? const Icon(Icons.person, size: 50, color: Colors.grey)

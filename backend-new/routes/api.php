@@ -28,6 +28,11 @@ Route::get('/get-data', [AuthController::class, 'getData']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
+// Categories (Admin)
+Route::post('/categories', [CategoryController::class, 'store']);
+Route::put('/categories/{id}', [CategoryController::class, 'update']);
+Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
 // Foods (public)
 Route::get('/foods', [FoodController::class, 'index']);
 Route::post('/foods', [FoodController::class, 'store']);
@@ -35,6 +40,7 @@ Route::get('/foods/{id}', [FoodController::class, 'show']);
 Route::put('/foods/{id}', [FoodController::class, 'update']);
 Route::get('/foods/{id}/similar', [FoodController::class, 'similar']);
 Route::get('/foods/{id}/reviews', [FoodController::class, 'reviews']);
+Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -43,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::get('/user', [AuthController::class, 'profile']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::get('/get-data', [AuthController::class, 'getData']);
+    Route::post('/admin/users', [AuthController::class, 'storeUser']); // Admin user creation
     Route::post('/user/profile', [AuthController::class, 'updateProfile']);
     
     
@@ -56,6 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
     Route::get('/orders/{id}/track', [OrderController::class, 'track']);
     

@@ -269,16 +269,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 16),
                             // Featured Horizontal Scroll
                             SizedBox(
-                              height: 240,
+                              height: 320,
                               child: foodItems.isEmpty
                                   ? const Center(child: Text('No foods available'))
-                                  : ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  : PageView.builder(
                                       itemCount: foodItems.length > 3 ? 3 : foodItems.length,
                                       itemBuilder: (context, index) {
                                         final food = foodItems[index];
-                                        return _buildFeaturedCard(context, food, appState);
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                          child: _buildFeaturedCard(context, food, appState),
+                                        );
                                       },
                                     ),
                             ),
@@ -399,8 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
       child: Container(
-        width: 290,
-        margin: const EdgeInsets.only(right: 16),
+        margin: const EdgeInsets.only(bottom: 24),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -423,12 +423,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Image.network(
                     food.imageUrl,
                     width: double.infinity,
-                    height: 140,
-                    fit: BoxFit.contain,
+                    height: 220,
+                    fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         width: double.infinity,
-                        height: 140,
+                        height: 220,
                         color: Colors.grey[200],
                         child: const Icon(
                           Icons.fastfood,

@@ -47,7 +47,11 @@ class FoodItem {
     } else if (img.startsWith('http')) {
       parsedImageUrl = ApiConfig.resolveImageUrl(img);
     } else {
-      parsedImageUrl = '${ApiConfig.storageUrl}/$img';
+      String cleanImg = img;
+      if (cleanImg.startsWith('/storage/')) cleanImg = cleanImg.replaceFirst('/storage/', '');
+      if (cleanImg.startsWith('storage/')) cleanImg = cleanImg.replaceFirst('storage/', '');
+      if (cleanImg.startsWith('/')) cleanImg = cleanImg.substring(1);
+      parsedImageUrl = '${ApiConfig.storageUrl}/$cleanImg';
     }
 
     return FoodItem(

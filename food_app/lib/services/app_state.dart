@@ -360,6 +360,10 @@ class AppState extends ChangeNotifier {
     return await _orderService.getOrders(status: status);
   }
 
+  Future<bool> deleteOrder(String orderId) async {
+    return await _orderService.deleteOrder(orderId);
+  }
+
   Future<Map<String, dynamic>> placeOrder({required String deliveryAddress, required String paymentMethod, String? notes}) async {
     if (_cartItems.isEmpty) {
       return {'success': false, 'message': 'Your cart is empty'};

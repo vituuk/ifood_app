@@ -1,3 +1,5 @@
+import '../../config/api_config.dart';
+
 class FoodModel {
   final int id;
   final int categoryId;
@@ -40,6 +42,20 @@ class FoodModel {
   });
 
   factory FoodModel.fromJson(Map<String, dynamic> json) {
+    String? img = json['image']?.toString();
+    String? parsedImage;
+    if (img != null && img.isNotEmpty) {
+      if (img.startsWith('http')) {
+        // We still need to require ApiConfig to use resolveImageUrl later
+        parsedImage = img; 
+      } else {
+        if (img.startsWith('/storage/')) img = img.replaceFirst('/storage/', '');
+        else if (img.startsWith('storage/')) img = img.replaceFirst('storage/', '');
+        if (img.startsWith('/')) img = img.substring(1);
+        parsedImage = '/storage/$img'; // ApiConfig check later
+      }
+    }
+
     return FoodModel(
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
       categoryId: json['category_id'] is int ? json['category_id'] : int.parse(json['category_id'].toString()),
@@ -47,7 +63,7 @@ class FoodModel {
       slug: json['slug'] ?? '',
       description: json['description'],
       price: json['price'] is double ? json['price'] : double.parse(json['price'].toString()),
-      image: json['image'],
+      image: parsedImage ?? json['image'],
       rating: json['rating'] is double ? json['rating'] : double.parse(json['rating'].toString()),
       reviews: json['reviews'] is int ? json['reviews'] : int.parse(json['reviews'].toString()),
       prepTime: json['prep_time'],
@@ -83,7 +99,20 @@ class FoodModel {
   }
 
   // Helper getters for UI
-  String get imageUrl => image ?? 'https://via.placeholder.com/300?text=${Uri.encodeComponent(name)}';
+  String get imageUrl {
+    if (image == null || image!.isEmpty) {
+      return 'https://via.placeholder.com/300?text=${Uri.encodeComponent(name)}';
+    }
+    if (image!.startsWith('http')) {
+      return ApiConfig.resolveImageUrl(image!);
+    }
+    String cleanImage = image!;
+    if (cleanImage.startsWith('/storage/')) cleanImage = cleanImage.replaceFirst('/storage/', '');
+    if (cleanImage.startsWith('storage/')) cleanImage = cleanImage.replaceFirst('storage/', '');
+    if (cleanImage.startsWith('/')) cleanImage = cleanImage.substring(1);
+    
+    return '${ApiConfig.storageUrl}/$cleanImage';
+  }
   String get category => categoryName ?? 'Food';
   String get priceFormatted => '\$${price.toStringAsFixed(2)}';
   String get ratingFormatted => rating.toStringAsFixed(1);
