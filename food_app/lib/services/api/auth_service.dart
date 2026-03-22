@@ -42,7 +42,7 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String name, String email, String password, {File? avatarPath}) async {
+  Future<Map<String, dynamic>> register(String name, String email, String password, String address, String phone, {File? avatarPath}) async {
     try {
       dynamic requestData;
       
@@ -51,6 +51,8 @@ class AuthService {
           'name': name,
           'email': email,
           'password': password,
+          'address': address,
+          'phone': phone,
           'avatar': await MultipartFile.fromFile(
             avatarPath.path,
             filename: avatarPath.path.split('/').last,
@@ -61,6 +63,8 @@ class AuthService {
           'name': name,
           'email': email,
           'password': password,
+          'address': address,
+          'phone': phone,
         };
       }
 

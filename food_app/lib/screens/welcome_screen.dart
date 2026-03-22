@@ -39,19 +39,37 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   const Spacer(),
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.brown.withOpacity(0.8),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.restaurant,
-                      size: 50,
                       color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ClipOval(
+                        child: Image.network(
+                          'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.restaurant,
+                              size: 50,
+                              color: Colors.black54,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   const Text(
                     'iFood',
                     style: TextStyle(

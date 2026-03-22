@@ -164,7 +164,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   children: [
                     const CircleAvatar(
                       radius: 22,
-                      backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=47'),
+                      backgroundImage: NetworkImage('https://img.freepik.com/free-vector/support-worker_1212-32.jpg?semt=ais_hybrid&w=740&q=80https://i.pravatar.cc/150?img=47'),
                     ),
                     Positioned(
                       bottom: 0,

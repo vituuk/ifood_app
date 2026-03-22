@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import 'order_history_screen.dart';
 import 'login_screen.dart';
+import 'register_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -286,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (BuildContext context) {
+                    builder: (BuildContext dialogContext) {
                       return AlertDialog(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -307,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         actions: [
                           TextButton(
                             onPressed: () {
-                              Navigator.pop(context); // Close dialog
+                              Navigator.pop(dialogContext); // Close dialog
                             },
                             child: Text(
                               'Cancel',
@@ -321,15 +322,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
-                              Navigator.pop(context); // Close dialog
-                              // Navigate to login screen and clear all routes
-                              Navigator.pushAndRemoveUntil(
+                            onPressed: () async {
+                              Navigator.pop(dialogContext); // Close dialog
+                              
+                              // Log out from app state
+                              await context.read<AppState>().logout();
+                              
+                              if (!context.mounted) return;
+                              // Navigate to register screen without destroying the back stack
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
+                                  builder: (context) => const RegisterScreen(),
                                 ),
-                                (route) => false,
                               );
                             },
                             child: const Text(

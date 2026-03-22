@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../data/models/category_model.dart';
 import '../data/models/user_model.dart';
+import '../data/models/order_model.dart';
 import '../models/food_item.dart';
 import 'api/api_client.dart';
 import 'api/auth_service.dart';
@@ -10,6 +11,8 @@ import 'api/favorite_service.dart';
 import 'api/food_service.dart';
 import 'api/order_service.dart';
 import 'api/message_service.dart';
+import 'api/address_service.dart';
+import '../data/models/address_model.dart';
 import '../../models/message_model.dart';
 import 'storage_service.dart';
 import 'dart:io';
@@ -21,6 +24,7 @@ class AppState extends ChangeNotifier {
   late final AuthService _authService;
   late final OrderService _orderService;
   late final MessageService _messageService;
+  late final AddressService _addressService;
   final StorageService _storageService = StorageService();
 
   List<FoodItem> _foodItems = [];
@@ -73,6 +77,7 @@ class AppState extends ChangeNotifier {
     _authService = AuthService(apiClient, _storageService);
     _orderService = OrderService(apiClient);
     _messageService = MessageService(apiClient);
+    _addressService = AddressService(apiClient);
   }
 
   Future<void> _loadInitialData() async {
@@ -351,6 +356,10 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<OrderModel>> getOrders({String? status}) async {
+    return await _orderService.getOrders(status: status);
+  }
+
   Future<Map<String, dynamic>> placeOrder({required String deliveryAddress, required String paymentMethod, String? notes}) async {
     if (_cartItems.isEmpty) {
       return {'success': false, 'message': 'Your cart is empty'};
@@ -407,12 +416,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> register(String name, String email, String password, {File? avatarFile}) async {
+  Future<void> register(String name, String email, String password, String address, String phone, {File? avatarFile}) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
-      final result = await _authService.register(name, email, password, avatarPath: avatarFile);
+      final result = await _authService.register(name, email, password, address, phone, avatarPath: avatarFile);
       if (result['success'] == true && result['user'] != null) {
         _currentUser = UserModel.fromJson(Map<String, dynamic>.from(result['user']));
         await Future.wait([loadCart(), loadFavorites(), loadMessages()]);
@@ -431,6 +440,8 @@ class AppState extends ChangeNotifier {
   Future<void> logout() async {
     try {
       await _authService.logout();
+    } catch (e) {
+      debugPrint('Backend logout error (safe to ignore): $e');
     } finally {
       _currentUser = null;
       _cartItems.clear();
@@ -444,5 +455,9 @@ class AppState extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  Future<AddressModel?> getDefaultAddress() async {
+    return await _addressService.getDefaultAddress();
   }
 }

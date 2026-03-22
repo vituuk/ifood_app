@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/app_state.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -164,7 +166,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           color: Colors.grey[300],
                         ),
                         const SizedBox(height: 16),
-                        Text(
+                        const Text(
                           'No orders found',
                           style: TextStyle(
                             fontSize: 18,
@@ -191,6 +193,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: _buildOrderCard(
+                          index,
                           order['id'],
                           order['items'],
                           order['price'],
@@ -238,17 +241,26 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Widget _buildOrderCard(
+    int index,
     String orderId,
     String items,
     String price,
     String date,
     String status,
     Color statusColor,
-    String imageUrl,
+    String fallbackImageUrl,
   ) {
+    // Attempt to hijack real food images dynamically from API data
+    String finalImageUrl = fallbackImageUrl;
+    try {
+      final foodItems = context.read<AppState>().foodItems;
+      if (foodItems.isNotEmpty) {
+        finalImageUrl = foodItems[index % foodItems.length].imageUrl;
+      }
+    } catch (_) {}
+
     return GestureDetector(
       onTap: () {
-        // Navigate to order detail screen
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Viewing order $orderId'),
@@ -275,10 +287,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                imageUrl,
+                finalImageUrl,
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 70,
+                    height: 70,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.fastfood, color: Colors.grey),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
@@ -289,14 +309,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Order $orderId',
-                        style: const TextStyle(
-                          color: primaryBlue,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          'Order $orderId',
+                          style: const TextStyle(
+                            color: primaryBlue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         price,
                         style: const TextStyle(
@@ -310,7 +334,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   const SizedBox(height: 4),
                   Text(
                     items,
-                    style: TextStyle(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
                       fontSize: 13,
                       color: primaryBlue,
                     ),
@@ -319,16 +345,20 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        date,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: primaryBlue,
+                      Flexible(
+                        child: Text(
+                          date,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: primaryBlue,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          horizontal: 10,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
@@ -339,7 +369,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           status,
                           style: TextStyle(
                             color: statusColor,
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

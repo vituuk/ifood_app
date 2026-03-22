@@ -30,11 +30,11 @@ class AddressModel {
       id: json['id'].toString(),
       userId: json['user_id'].toString(),
       label: json['label'] ?? '',
-      addressLine1: json['address_line1'] ?? '',
+      addressLine1: json['address_line1'] ?? json['address'] ?? '',
       addressLine2: json['address_line2'],
       city: json['city'] ?? '',
       state: json['state'] ?? '',
-      postalCode: json['postal_code'] ?? '',
+      postalCode: json['postal_code'] ?? json['zip_code'] ?? '',
       country: json['country'] ?? '',
       phone: json['phone'],
       isDefault: json['is_default'] ?? false,
@@ -44,11 +44,11 @@ class AddressModel {
   Map<String, dynamic> toJson() {
     return {
       'label': label,
-      'address_line1': addressLine1,
+      'address': addressLine1,
       'address_line2': addressLine2,
       'city': city,
       'state': state,
-      'postal_code': postalCode,
+      'zip_code': postalCode,
       'country': country,
       'phone': phone,
       'is_default': isDefault,
@@ -59,11 +59,11 @@ class AddressModel {
     final parts = [
       addressLine1,
       if (addressLine2 != null && addressLine2!.isNotEmpty) addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
+      if (city.isNotEmpty && city != 'Unknown') city,
+      if (state.isNotEmpty && state != 'Unknown') state,
+      if (postalCode.isNotEmpty && postalCode != '00000') postalCode,
+      if (country.isNotEmpty && country != 'Unknown') country,
     ];
-    return parts.join(', ');
+    return parts.where((p) => p != null && p!.isNotEmpty).join(', ');
   }
 }

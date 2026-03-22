@@ -17,14 +17,15 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'phone' => 'nullable|string|max:20',
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
             'phone' => $request->phone,
             'role' => 'user',
             'status' => 'active',
@@ -35,6 +36,17 @@ class AuthController extends Controller
             $user->avatar = '/storage/' . $path;
             $user->save();
         }
+
+        // Create default address for user
+        \App\Models\Address::create([
+            'user_id' => $user->id,
+            'label' => 'Home',
+            'address' => $request->address,
+            'city' => '',
+            'state' => '',
+            'zip_code' => '',
+            'is_default' => true,
+        ]);
 
         // Create cart for user
         Cart::create(['user_id' => $user->id]);

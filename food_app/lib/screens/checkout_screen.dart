@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import 'main_navigation.dart';
+import '../data/models/address_model.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -14,6 +15,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   static const Color primaryRed = Color(0xFFFF4757);
   String _selectedPayment = '';
   bool _cashOnDelivery = false;
+  AddressModel? _defaultAddress;
+  bool _isLoadingAddress = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final address = await appState.getDefaultAddress();
+    if (mounted) {
+      setState(() {
+        _defaultAddress = address;
+        _isLoadingAddress = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,21 +117,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Address',
+                                _isLoadingAddress
+                                    ? 'Address'
+                                    : (_defaultAddress?.label.isNotEmpty == true
+                                        ? _defaultAddress!.label
+                                        : 'Address'),
                                 style: TextStyle(
                                   color: Colors.grey[500],
                                   fontSize: 12,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                '8502 Preston Rd. Inglewood,\nMaine 98380',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.5,
-                                ),
-                              ),
+                              _isLoadingAddress
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: primaryRed),
+                                  )
+                                : Text(
+                                    _defaultAddress?.fullAddress ?? 'No default address found',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.5,
+                                    ),
+                                  ),
                             ],
                           ),
                         ),
@@ -170,9 +200,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                'sara.cruz@example.com',
-                                style: TextStyle(
+                              Text(
+                                appState.currentUser?.email ?? 'No email found',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -226,9 +256,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                '(229) 555-0109',
-                                style: TextStyle(
+                              Text(
+                                (appState.currentUser?.phone != null && appState.currentUser!.phone!.isNotEmpty) 
+                                    ? appState.currentUser!.phone! 
+                                    : 'Not provided',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -397,9 +429,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     );
                     return;
                   }
+
+                  if (_isLoadingAddress) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please wait for address to load'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (_defaultAddress == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please add a delivery address first'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
                   
                   final paymentMethod = _cashOnDelivery ? 'cash_on_delivery' : _selectedPayment;
-                  final address = '8502 Preston Rd. Inglewood, Maine 98380';
+                  final address = _defaultAddress!.fullAddress;
                   
                   final result = await appState.placeOrder(
                     deliveryAddress: address, 

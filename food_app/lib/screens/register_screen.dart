@@ -24,6 +24,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   void dispose() {
@@ -31,6 +33,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -54,21 +58,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600',
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
+              const SizedBox(height: 10),
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ClipOval(
+                      child: Image.network(
+                        'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: primaryBlue.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.restaurant, color: primaryBlue, size: 40),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
-              const Text('Register First', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Center(
+                child: Text(
+                  'Register First',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                ),
+              ),
               const SizedBox(height: 8),
-              Text(
-                'Create your customer account one time. After that, use login to access the app.',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              Center(
+                child: Text(
+                  'Create your customer account one time. After that, use login to access the app.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: 30),
               Center(
@@ -119,6 +158,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
                 decoration: _inputDecoration('hello@example.com'),
+              ),
+              const SizedBox(height: 20),
+              const Text('Address', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _addressController,
+                validator: (value) => (value?.trim().isEmpty ?? true) ? 'Please enter your address' : null,
+                decoration: _inputDecoration('Enter your full address'),
+              ),
+              const SizedBox(height: 20),
+              const Text('Phone Number', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                validator: (value) => (value?.trim().isEmpty ?? true) ? 'Please enter your phone number' : null,
+                decoration: _inputDecoration('Enter your phone number'),
               ),
               const SizedBox(height: 20),
               const Text('Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
@@ -236,6 +292,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
+        _addressController.text.trim(),
+        _phoneController.text.trim(),
         avatarFile: _avatarImage,
       );
 

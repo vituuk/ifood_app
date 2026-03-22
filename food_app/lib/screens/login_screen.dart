@@ -49,12 +49,37 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               Center(
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
-                    color: primaryBlue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.restaurant, color: primaryBlue, size: 50),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ClipOval(
+                      child: Image.network(
+                        'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: primaryBlue.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.restaurant, color: primaryBlue, size: 40),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
